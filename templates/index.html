@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYSCEF Scraper</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>NYSCEF Document Lookup</h1>
+        <p class="subtitle">Enter your NYSCEF credentials and a case index number to retrieve the document list.</p>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form action="/scrape" method="POST">
+            <div class="field">
+                <label for="username">NYSCEF Username</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <div class="field">
+                <label for="index_number">Index Number</label>
+                <input type="text" id="index_number" name="index_number" placeholder="e.g. 123456/2024" required>
+            </div>
+            <button type="submit" id="submit-btn" onclick="this.disabled=true; this.textContent='Looking up case…'; this.form.submit();">
+                Look Up Case
+            </button>
+        </form>
+    </div>
+</body>
+</html>
