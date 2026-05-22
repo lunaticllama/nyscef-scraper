@@ -1,6 +1,8 @@
+import logging
 from flask import Flask, render_template, request
 from scraper import NyscefScraper
 
+logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 
 
@@ -18,15 +20,18 @@ def scrape():
     if not username or not password or not index_number:
         return render_template('index.html', error="All fields are required.")
 
-    scraper = NyscefScraper(username, password)
+    scraper = None
     try:
+        scraper = NyscefScraper(username, password)
         documents = scraper.get_documents(index_number)
     except ValueError as e:
         return render_template('index.html', error=str(e))
-    except Exception:
-        return render_template('index.html', error="An unexpected error occurred. Please try again.")
+    except Exception as e:
+        app.logger.exception("Scrape failed")
+        return render_template('index.html', error=f"Error: {e}")
     finally:
-        scraper.close()
+        if scraper:
+            scraper.close()
 
     return render_template('results.html', documents=documents, index_number=index_number)
 
