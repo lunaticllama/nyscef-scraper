@@ -161,3 +161,59 @@ td {
     body { background: #fff; }
     .container { box-shadow: none; }
 }
+
+/* Install page */
+
+.steps { list-style: none; counter-reset: steps; margin: 0; padding: 0; }
+.steps li {
+    counter-increment: steps;
+    display: flex;
+    gap: 14px;
+    margin-bottom: 1.4rem;
+    align-items: flex-start;
+}
+.steps li::before {
+    content: counter(steps);
+    background: #1a56db;
+    color: #fff;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.steps li div { flex: 1; }
+.steps li strong { display: block; margin-bottom: 3px; }
+
+.drag-wrap {
+    margin-top: 10px;
+    padding: 14px;
+    background: #f0f4ff;
+    border: 2px dashed #93aee8;
+    border-radius: 8px;
+    text-align: center;
+}
+.drag-wrap p { font-size: 0.82rem; color: #555; margin-bottom: 8px; }
+
+.bookmarklet-btn {
+    display: inline-block;
+    padding: 8px 18px;
+    background: #1a3a5c;
+    color: #fff;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: grab;
+    border: 2px solid #2d6a9f;
+}
+.bookmarklet-btn:hover { background: #22507a; }
+
+.tip { font-size: 0.82rem; color: #666; margin-top: 6px; }
+.install-note { font-size: 0.85rem; color: #555; }
+.divider { border: none; border-top: 1px solid #eaecf0; margin: 1.8rem 0; }

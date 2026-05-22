@@ -3,40 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYSCEF Scraper</title>
+    <title>NYSCEF Scraper — Install</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>NYSCEF Document Lookup</h1>
-        <p class="subtitle">Enter your NYSCEF credentials and a case index number to retrieve the document list.</p>
+        <h1>NYSCEF Document Scraper</h1>
+        <p class="subtitle">A browser bookmarklet that extracts the document list from any NYSCEF case page — no login required, works wherever you can open a browser.</p>
 
-        {% if error %}
-        <div class="error">{{ error }}</div>
-        {% endif %}
+        <hr class="divider">
 
-        {% if screenshot %}
-        <p style="font-size:0.85rem;color:#666;margin-bottom:0.5rem;">Page screenshot at time of error:</p>
-        <img src="data:image/png;base64,{{ screenshot }}" style="width:100%;border:1px solid #ddd;border-radius:6px;margin-bottom:1rem;">
-        {% endif %}
+        <ol class="steps">
+            <li>
+                <div>
+                    <strong>Show your bookmarks bar</strong>
+                    Chrome: <kbd>Ctrl+Shift+B</kbd> &nbsp;|&nbsp; Edge: <kbd>Ctrl+Shift+B</kbd> &nbsp;|&nbsp; Firefox: <kbd>Ctrl+Shift+B</kbd>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <strong>Drag this button to your bookmarks bar</strong>
+                    <div class="drag-wrap">
+                        <p>Drag the button below up to your bookmarks bar</p>
+                        <a class="bookmarklet-btn"
+                           title="NYSCEF Scraper bookmarklet — drag to bookmarks bar"
+                           href="javascript:(function(){var s=document.createElement('script');s.src='{{ request.url_root }}static/bookmarklet.js?v='+Date.now();document.body.appendChild(s);})();">&#128196; NYSCEF Scraper</a>
+                        <p class="tip">Can't drag? Right-click the button &rarr; "Bookmark this link"</p>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div>
+                    <strong>Log in to NYSCEF normally</strong>
+                    Go to <a href="https://iapps.courts.state.ny.us/nyscef/Login" target="_blank">iapps.courts.state.ny.us/nyscef/Login</a> and sign in with your credentials.
+                </div>
+            </li>
+            <li>
+                <div>
+                    <strong>Navigate to a case's Document List</strong>
+                    Click <em>My Cases/Appeals</em> &rarr; click a case number &rarr; make sure the <em>Document List</em> tab is selected.
+                </div>
+            </li>
+            <li>
+                <div>
+                    <strong>Click the bookmark</strong>
+                    A panel appears with all documents listed. Sort by any column or copy the full list as CSV.
+                </div>
+            </li>
+        </ol>
 
-        <form action="/scrape" method="POST">
-            <div class="field">
-                <label for="username">NYSCEF Username</label>
-                <input type="text" id="username" name="username" required autocomplete="username">
-            </div>
-            <div class="field">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required autocomplete="current-password">
-            </div>
-            <div class="field">
-                <label for="index_number">Index Number</label>
-                <input type="text" id="index_number" name="index_number" placeholder="e.g. 123456/2024" required>
-            </div>
-            <button type="submit" id="submit-btn" onclick="this.disabled=true; this.textContent='Looking up case…'; this.form.submit();">
-                Look Up Case
-            </button>
-        </form>
+        <hr class="divider">
+
+        <p class="install-note">
+            <strong>Note:</strong> The bookmarklet always loads the latest version from this server, so updates are automatic.
+            Click it again on any NYSCEF page to close the panel.
+        </p>
     </div>
 </body>
 </html>
