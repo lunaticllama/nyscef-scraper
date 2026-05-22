@@ -111,7 +111,7 @@
         var btnWrap = document.createElement('div');
         btnWrap.style.cssText = 'display:flex;gap:6px;flex-shrink:0;';
 
-        var csvBtn = makeBtn('Copy CSV', '#2d6a9f');
+        var csvBtn = makeBtn('Copy for Email', '#2d6a9f');
         var closeBtn = makeBtn('✕', 'transparent');
         closeBtn.style.border = '1px solid rgba(255,255,255,0.35)';
         closeBtn.onclick = function () { overlay.remove(); };
@@ -212,17 +212,41 @@
 
         renderRows();
 
-        // CSV copy
+        // Copy as formatted HTML (pastes as a table in Outlook/Word)
         csvBtn.onclick = function () {
-            var lines = ['"#","Document","Subtitle","Filed By","Date Filed","Status"'];
-            docs.forEach(function (d) {
-                lines.push([d.num, d.docName, d.subtitle, d.filedBy, d.filedDate, d.status].map(function (v) {
-                    return '"' + (v || '').replace(/"/g, '""') + '"';
-                }).join(','));
+            var thStyle = 'padding:6px 10px;border:1px solid #999;text-align:left;background:#1a3a5c;color:#fff;font-family:Calibri,Arial,sans-serif;font-size:11pt;';
+            var tdStyle = 'padding:5px 10px;border:1px solid #ccc;vertical-align:top;font-family:Calibri,Arial,sans-serif;font-size:11pt;';
+            var tdAltStyle = tdStyle + 'background:#f2f5f9;';
+
+            var html = '<p style="font-family:Calibri,Arial,sans-serif;font-size:11pt;font-weight:bold;margin-bottom:6px;">' + esc(caseTitle) + '</p>';
+            html += '<table style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:11pt;">';
+            html += '<thead><tr>';
+            ['#', 'Document', 'Filed By', 'Date Filed', 'Status'].forEach(function (col) {
+                html += '<th style="' + thStyle + '">' + esc(col) + '</th>';
             });
-            navigator.clipboard.writeText(lines.join('\n')).then(function () {
+            html += '</tr></thead><tbody>';
+
+            docs.forEach(function (d, i) {
+                var td = i % 2 === 0 ? tdStyle : tdAltStyle;
+                var docCell = '<span style="font-weight:bold;">' + esc(d.docName) + '</span>' +
+                    (d.subtitle ? '<br><span style="font-style:italic;color:#555;">' + esc(d.subtitle) + '</span>' : '');
+                var statusCell = d.status.toLowerCase().indexOf('process') !== -1
+                    ? '<span style="color:#1a7a1a;font-weight:bold;">' + esc(d.status) + '</span>'
+                    : esc(d.status);
+                html += '<tr>';
+                html += '<td style="' + td + 'text-align:center;">' + esc(d.num) + '</td>';
+                html += '<td style="' + td + '">' + docCell + '</td>';
+                html += '<td style="' + td + '">' + esc(d.filedBy) + '</td>';
+                html += '<td style="' + td + 'white-space:nowrap;">' + esc(d.filedDate) + '</td>';
+                html += '<td style="' + td + '">' + statusCell + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+
+            var blob = new Blob([html], { type: 'text/html' });
+            navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]).then(function () {
                 csvBtn.textContent = 'Copied!';
-                setTimeout(function () { csvBtn.textContent = 'Copy CSV'; }, 2000);
+                setTimeout(function () { csvBtn.textContent = 'Copy for Email'; }, 2000);
             });
         };
 
