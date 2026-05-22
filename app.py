@@ -25,7 +25,13 @@ def scrape():
         scraper = NyscefScraper(username, password)
         documents = scraper.get_documents(index_number)
     except ValueError as e:
-        return render_template('index.html', error=str(e))
+        msg = str(e)
+        if msg.startswith('LOGIN_PAGE_NOT_FOUND|'):
+            _, url, screenshot = msg.split('|', 2)
+            return render_template('index.html',
+                                   error=f"Could not find login form. Page URL: {url}",
+                                   screenshot=screenshot)
+        return render_template('index.html', error=msg)
     except Exception as e:
         app.logger.exception("Scrape failed")
         return render_template('index.html', error=f"Error: {e}")

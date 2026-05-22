@@ -15,6 +15,11 @@
         <div class="error">{{ error }}</div>
         {% endif %}
 
+        {% if screenshot %}
+        <p style="font-size:0.85rem;color:#666;margin-bottom:0.5rem;">Page screenshot at time of error:</p>
+        <img src="data:image/png;base64,{{ screenshot }}" style="width:100%;border:1px solid #ddd;border-radius:6px;margin-bottom:1rem;">
+        {% endif %}
+
         <form action="/scrape" method="POST">
             <div class="field">
                 <label for="username">NYSCEF Username</label>

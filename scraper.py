@@ -13,9 +13,19 @@ class NyscefScraper:
         self.browser = self._playwright.chromium.launch(headless=True)
         self.page = self.browser.new_page()
 
+    def _screenshot_b64(self):
+        import base64
+        return base64.b64encode(self.page.screenshot()).decode()
+
     def login(self):
-        self.page.goto(self.LOGIN_URL)
-        self.page.wait_for_selector('input[name="txtUserName"]', timeout=self.TIMEOUT)
+        self.page.goto(self.LOGIN_URL, wait_until='domcontentloaded', timeout=30000)
+
+        try:
+            self.page.wait_for_selector('input[name="txtUserName"]', timeout=self.TIMEOUT)
+        except PlaywrightTimeout:
+            shot = self._screenshot_b64()
+            raise ValueError(f"LOGIN_PAGE_NOT_FOUND|{self.page.url}|{shot}")
+
         self.page.fill('input[name="txtUserName"]', self.username)
         self.page.fill('input[name="pwPassword"]', self.password)
         self.page.click('input[name="btnSubmit"]')
