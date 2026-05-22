@@ -11,17 +11,24 @@
         return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    // ── Case title ───────────────────────────────────────────────────────────
+    // ── Case info ─────────────────────────────────────────────────────────────
 
-    function getCaseTitle() {
-        // NYSCEF renders the case number as bold text at the top of the content area
-        // e.g. "519386/2025 - Kings County Supreme Court"
+    function getCaseInfo() {
+        // Index number: bold heading e.g. "519386/2025 - Kings County Supreme Court"
+        var indexNo = '';
         var bolds = document.querySelectorAll('b');
         for (var i = 0; i < bolds.length; i++) {
-            var t = bolds[i].textContent.trim();
-            if (/\d+[\/\-]\d+/.test(t) && t.length < 120) return t;
+            var m = bolds[i].textContent.trim().match(/^(\d+[\/\-]\d+)/);
+            if (m) { indexNo = m[1]; break; }
         }
-        return document.title;
+
+        // Short Caption: scan visible page text for "Short Caption: <value>"
+        var caption = '';
+        var bodyText = document.body.innerText || '';
+        var cm = bodyText.match(/Short Caption:\s*([^\n]+)/i);
+        if (cm) caption = cm[1].trim();
+
+        return { indexNo: indexNo, caption: caption };
     }
 
     // ── Find document table ───────────────────────────────────────────────────
@@ -88,7 +95,8 @@
 
     // ── Build overlay ─────────────────────────────────────────────────────────
 
-    function buildOverlay(caseTitle, docs) {
+    function buildOverlay(caseInfo, docs) {
+        var caseTitle = caseInfo.caption || caseInfo.indexNo || 'NYSCEF Case';
         var overlay = document.createElement('div');
         overlay.id = 'nyscef-bm-overlay';
         overlay.style.cssText = [
@@ -105,8 +113,9 @@
         hdr.style.cssText = 'background:#1a3a5c;color:#fff;padding:11px 14px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:10px;';
 
         var titleEl = document.createElement('div');
-        titleEl.style.cssText = 'font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;';
-        titleEl.textContent = caseTitle;
+        titleEl.style.cssText = 'flex:1;overflow:hidden;';
+        titleEl.innerHTML = '<div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(caseTitle) + '</div>' +
+            (caseInfo.indexNo ? '<div style="font-size:11px;opacity:0.75;margin-top:1px;">Index No. ' + esc(caseInfo.indexNo) + '</div>' : '');
 
         var btnWrap = document.createElement('div');
         btnWrap.style.cssText = 'display:flex;gap:6px;flex-shrink:0;';
@@ -218,7 +227,8 @@
             var tdStyle = 'padding:5px 10px;border:1px solid #ccc;vertical-align:top;font-family:Calibri,Arial,sans-serif;font-size:11pt;';
             var tdAltStyle = tdStyle + 'background:#f2f5f9;';
 
-            var html = '<p style="font-family:Calibri,Arial,sans-serif;font-size:11pt;font-weight:bold;margin-bottom:6px;">' + esc(caseTitle) + '</p>';
+            var html = '<p style="font-family:Calibri,Arial,sans-serif;font-size:12pt;font-weight:bold;margin-bottom:2px;">' + esc(caseTitle) + '</p>' +
+                (caseInfo.indexNo ? '<p style="font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#555;margin-bottom:8px;">Index No. ' + esc(caseInfo.indexNo) + '</p>' : '');
             html += '<table style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:11pt;">';
             html += '<thead><tr>';
             ['#', 'Document', 'Filed By', 'Date Filed', 'Status'].forEach(function (col) {
@@ -274,7 +284,7 @@
         return;
     }
 
-    var overlay = buildOverlay(getCaseTitle(), docs);
+    var overlay = buildOverlay(getCaseInfo(), docs);
     document.body.appendChild(overlay);
 
 })();
