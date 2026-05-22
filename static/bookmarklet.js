@@ -77,16 +77,32 @@
     // ── Pagination: find URLs for pages 2…N ───────────────────────────────────
 
     function getExtraPageUrls() {
-        // Locate the "Page:" label text node, then inspect its parent for links
+        // Find the pagination container by locating any text node containing "Page:"
+        // then walking up until we find an ancestor that also contains page links.
         var paginEl = null;
         var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         var node;
         while ((node = walker.nextNode())) {
-            if (/^\s*Page:\s*$/.test(node.nodeValue)) { paginEl = node.parentElement; break; }
+            if (node.nodeValue.indexOf('Page:') !== -1) {
+                // Walk up from the text node until we find an ancestor with numbered links
+                var el = node.parentElement;
+                while (el && el !== document.body) {
+                    var links = el.querySelectorAll('a');
+                    for (var li = 0; li < links.length; li++) {
+                        if (/^\d+$/.test(links[li].textContent.trim())) { paginEl = el; break; }
+                    }
+                    if (paginEl) break;
+                    el = el.parentElement;
+                }
+                if (paginEl) break;
+            }
         }
+
+        console.log('[NYSCEF Scraper] Pagination container:', paginEl);
         if (!paginEl) return [];
 
         var allLinks = Array.from(paginEl.querySelectorAll('a'));
+        console.log('[NYSCEF Scraper] Pagination links:', allLinks.map(function(a){ return a.textContent.trim() + ' → ' + a.href; }));
         if (allLinks.length === 0) return [];
 
         var lastLink    = allLinks.find(function (a) { return a.textContent.trim().toLowerCase() === 'last'; });
@@ -334,6 +350,7 @@
 
     // Fetch remaining pages (if any)
     var extraUrls = getExtraPageUrls();
+    console.log('[NYSCEF Scraper] Extra page URLs:', extraUrls);
     if (extraUrls.length > 0) {
         var totalPages = extraUrls.length + 1;
         ui.setStatus('Page 1 of ' + totalPages + ' loaded — fetching remaining pages…');
